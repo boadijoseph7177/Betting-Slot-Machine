@@ -1,0 +1,151 @@
+#Betting Slot Machine Program
+
+import random
+
+"""This is a betting program in which the user deposits an amount and sets the number of lines to bet on and the amount.
+   The program displays the slots of 3 rows and 3 columns which is made up of randomly selected characters.
+   The user wins a bet when matching characters are found on a row.
+   The program displays winnings and starting balance is updated to reflect winnings or losses.  
+"""
+
+
+MAX_LINES = 3
+MIN_LINES = 1
+
+ROWS = 3
+COLS = 3
+
+symbols = {
+    "A": 3,
+    "B": 4,
+    "C": 5,
+    "D": 7
+}
+
+values = {
+    "A": 13,
+    "B": 10,
+    "C": 8,
+    "D": 6
+}
+
+
+def get_balance():
+    while True:
+        balance = input("What amount would you like to deposit into your account?: $")
+        if balance.isdigit():
+            balance = int(balance)
+            if balance > 0:
+                break
+            else:
+                print("You can't enter a negative balance.Try again")
+        else:
+            print("Please enter a digit.")
+
+    return balance
+
+
+def get_lines():
+    while True:
+        lines = input("Enter the number of lines you want to bet on (1-3): ")
+        if lines.isdigit():
+            lines = int(lines)
+            if MIN_LINES <= lines <= MAX_LINES:
+                break
+            else:
+                print("Lines cannot exceed the maximum, 3.")
+        else:
+            print("Please enter a digit.")
+
+    return lines
+
+
+def get_bet():
+    while True:
+        bet = input("How much would you like to bet on each line? : $")
+        if bet.isdigit():
+            bet = int(bet)
+            if bet > 0:
+                break
+            else:
+                print("You can't enter a negative bet.Try again")
+        else:
+            print("Please enter a digit.")
+
+    return bet
+
+
+def load_slots(symbols):
+    all_symbols = []
+    for symbol, symbol_count in symbols.items():
+        for _ in range(symbol_count):
+            all_symbols.append(symbol)
+
+    columns = []
+    current_symbols = all_symbols[:]
+    for col in range(COLS):
+        column = []
+        for row in range(ROWS):
+            value = random.choice(current_symbols)
+            column.append(value)
+            current_symbols.remove(value)
+        columns.append(column)
+
+    print(columns)
+    return columns
+
+
+def print_slots(columns):
+    for row in range(ROWS):
+        for i, column in enumerate(columns):
+            if i != len(column)-1:
+                print(column[row], end=" | ")
+            else:
+                print(column[row])
+
+
+def check_winnings(lines, columns, bet, values, winning_lines):
+    winnings = 0
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winning_lines.append(line+1)
+            winnings += values[symbol] * bet
+
+    return winnings
+
+
+def main():
+
+    balance = get_balance()
+
+    while True:
+        winning_lines = []
+        lines = get_lines()
+        print(f"{balance}, {lines}")
+        while True:
+            bet = get_bet()
+            total_bet = bet * lines
+            if total_bet <= balance:
+                break
+            else:
+                print("Insufficient balance to bet this amount.")
+
+        columns = load_slots(symbols)
+        print_slots(columns)
+        winnings = check_winnings(lines, columns, bet, values, winning_lines)
+        print(f"Winnings = {winnings}")
+        print("You won on lines: ", *winning_lines)
+        balance = balance-total_bet+winnings
+        print(f"Balance = ${balance}")
+
+        cont = input("Press q to quit or any letter to run again: ").lower()
+        if cont == 'q':
+            break
+
+
+main()
